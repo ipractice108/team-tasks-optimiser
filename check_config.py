@@ -99,7 +99,7 @@ def check_ai_provider():
         print_status("AI_MODEL", True, f"= {model}")
     else:
         defaults = {
-            'groq': 'llama-3.1-70b-versatile',
+            'groq': 'llama-3.3-70b-versatile',
             'gemini': 'gemini-pro',
             'ollama': 'llama3.1',
             'claude': 'claude-3-5-sonnet-20241022'

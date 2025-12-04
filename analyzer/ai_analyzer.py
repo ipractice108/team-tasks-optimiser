@@ -26,7 +26,7 @@ class AIAnalyzer:
         if self.provider == 'groq':
             from groq import Groq
             self.client = Groq(api_key=self.api_key)
-            self.model = os.getenv('AI_MODEL', 'llama-3.1-70b-versatile')
+            self.model = os.getenv('AI_MODEL', 'llama-3.3-70b-versatile')
 
         elif self.provider == 'gemini':
             import google.generativeai as genai
