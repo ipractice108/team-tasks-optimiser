@@ -1,0 +1,35 @@
+# Systemd service file for Telegram Chat Analyzer Bot
+#
+# Installation:
+# 1. Edit paths in this file to match your installation
+# 2. Copy to /etc/systemd/system/:
+#    sudo cp telegram-analyzer.service /etc/systemd/system/
+# 3. Reload systemd:
+#    sudo systemctl daemon-reload
+# 4. Enable and start:
+#    sudo systemctl enable telegram-analyzer
+#    sudo systemctl start telegram-analyzer
+# 5. Check status:
+#    sudo systemctl status telegram-analyzer
+# 6. View logs:
+#    sudo journalctl -u telegram-analyzer -f
+
+[Unit]
+Description=Telegram Chat Analyzer Bot
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/team-tasks-optimiser
+Environment="PATH=/path/to/team-tasks-optimiser/venv/bin"
+ExecStart=/path/to/team-tasks-optimiser/venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=append:/path/to/team-tasks-optimiser/bot.log
+StandardError=append:/path/to/team-tasks-optimiser/bot.log
+
+[Install]
+WantedBy=multi-user.target
