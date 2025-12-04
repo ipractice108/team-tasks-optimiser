@@ -3,8 +3,9 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-groq.txt .
+RUN pip install --no-cache-dir -r requirements-groq.txt && \
+    pip install --no-cache-dir --ignore-installed cffi cryptography
 
 # Copy application
 COPY . .
