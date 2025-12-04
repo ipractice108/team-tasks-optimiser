@@ -10,7 +10,7 @@ from telegram.ext import (
     ContextTypes
 )
 from database import Database
-from analyzer import ClaudeAnalyzer
+from analyzer import AIAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class BotHandlers:
     """Telegram bot handlers"""
 
-    def __init__(self, db: Database, analyzer: ClaudeAnalyzer):
+    def __init__(self, db: Database, analyzer: AIAnalyzer):
         self.db = db
         self.analyzer = analyzer
         self.admin_id = int(os.getenv('ADMIN_USER_ID', 0))
@@ -261,7 +261,7 @@ class BotHandlers:
         await application.bot.set_my_commands(commands)
 
 
-def setup_handlers(application: Application, db: Database, analyzer: ClaudeAnalyzer):
+def setup_handlers(application: Application, db: Database, analyzer: AIAnalyzer):
     """Setup bot handlers"""
     handlers = BotHandlers(db, analyzer)
 
