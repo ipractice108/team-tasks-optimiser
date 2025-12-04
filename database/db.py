@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta
 from typing import List, Optional
 from sqlalchemy import create_engine, desc
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, joinedload
 from .models import Base, User, Message, AnalysisReport
 
 
@@ -97,7 +97,7 @@ class Database:
         session = self.get_session()
         try:
             since = datetime.utcnow() - timedelta(days=days_back)
-            query = session.query(Message).filter(
+            query = session.query(Message).options(joinedload(Message.user)).filter(
                 Message.chat_id == chat_id,
                 Message.created_at >= since
             )
@@ -106,6 +106,12 @@ class Database:
                 query = query.filter(Message.topic_name == topic_name)
 
             messages = query.order_by(Message.created_at).all()
+
+            # Expunge objects from session so they can be used after session closes
+            for msg in messages:
+                session.expunge(msg)
+                session.expunge(msg.user)
+
             return messages
         finally:
             session.close()
