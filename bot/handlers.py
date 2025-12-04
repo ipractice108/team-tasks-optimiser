@@ -74,7 +74,7 @@ class BotHandlers:
 🔒 Анализ происходит через защищённый API
 🔒 Отчёты отправляются только вам
         """
-        await update.message.reply_text(help_text, parse_mode='Markdown')
+        await update.message.reply_text(help_text)
 
     async def status_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /status command"""
@@ -97,7 +97,7 @@ class BotHandlers:
 
 Следующий автоматический анализ: по расписанию
         """
-        await update.message.reply_text(status_text, parse_mode='Markdown')
+        await update.message.reply_text(status_text)
 
     async def analyze_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /analyze command - manual analysis trigger"""
