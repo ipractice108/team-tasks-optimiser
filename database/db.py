@@ -14,7 +14,7 @@ class Database:
             database_url = os.getenv('DATABASE_URL', 'sqlite:///./chat_analyzer.db')
 
         self.engine = create_engine(database_url, echo=False)
-        self.SessionLocal = sessionmaker(bind=self.engine)
+        self.SessionLocal = sessionmaker(bind=self.engine, expire_on_commit=False)
 
     def init_db(self):
         """Initialize database tables"""
@@ -106,12 +106,6 @@ class Database:
                 query = query.filter(Message.topic_name == topic_name)
 
             messages = query.order_by(Message.created_at).all()
-
-            # Expunge objects from session so they can be used after session closes
-            for msg in messages:
-                session.expunge(msg)
-                session.expunge(msg.user)
-
             return messages
         finally:
             session.close()
