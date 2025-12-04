@@ -207,7 +207,7 @@ class BotHandlers:
 
             # Send report to user
             header = f"""
-📊 **ОТЧЁТ ПО АНАЛИЗУ ЧАТА**
+📊 ОТЧЁТ ПО АНАЛИЗУ ЧАТА
 
 Период: {period_start.strftime('%d.%m.%Y')} - {period_end.strftime('%d.%m.%Y')}
 Сообщений проанализировано: {len(messages)}
@@ -222,15 +222,13 @@ class BotHandlers:
             if len(full_message) <= 4096:
                 await context.bot.send_message(
                     chat_id=user_id,
-                    text=full_message,
-                    parse_mode='Markdown'
+                    text=full_message
                 )
             else:
                 # Send in parts
                 await context.bot.send_message(
                     chat_id=user_id,
-                    text=header,
-                    parse_mode='Markdown'
+                    text=header
                 )
 
                 # Split analysis into chunks
