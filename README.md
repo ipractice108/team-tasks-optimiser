@@ -1,6 +1,6 @@
 # 🤖 Telegram Chat Analyzer Bot
 
-AI-бот для автоматического анализа рабочих чатов в Telegram с использованием Claude AI.
+AI-бот для автоматического анализа рабочих чатов в Telegram. **Поддержка бесплатных AI моделей!**
 
 ## 📋 Описание
 
@@ -9,7 +9,8 @@ AI-бот для автоматического анализа рабочих ч
 ## ✨ Возможности
 
 - 📊 **Мониторинг чатов** - автоматический сбор сообщений из всех топиков
-- 🤖 **AI-анализ** - глубокий анализ коммуникации с помощью Claude
+- 🤖 **AI-анализ** - глубокий анализ коммуникации с помощью передовых AI моделей
+- 🆓 **Бесплатные опции** - поддержка Groq, Gemini, Ollama (бесплатно!)
 - 💡 **Рекомендации** - конкретные предложения по улучшению процессов
 - 📨 **Личные отчёты** - результаты анализа отправляются вам в личку
 - ⏰ **Автоматизация** - анализ выполняется 2 раза в неделю по расписанию
@@ -48,7 +49,13 @@ AI-бот для автоматического анализа рабочих ч
 
 - Python 3.9+
 - Telegram Bot Token
-- Anthropic Claude API Key
+- AI Provider (выберите один):
+  - **Groq** (бесплатно, рекомендуется) ⭐
+  - **Google Gemini** (бесплатно)
+  - **Ollama** (локально, бесплатно)
+  - **Claude** (платно, премиум качество)
+
+📖 Подробнее про AI провайдеры: [AI_PROVIDERS.md](AI_PROVIDERS.md)
 
 ### Шаг 1: Клонирование репозитория
 
@@ -80,11 +87,20 @@ pip install -r requirements.txt
 3. Следуйте инструкциям для создания бота
 4. Сохраните полученный **Bot Token**
 
-### Шаг 4: Получение Anthropic API Key
+### Шаг 4: Получение AI API ключа (БЕСПЛАТНО!)
 
-1. Зарегистрируйтесь на [Anthropic Console](https://console.anthropic.com/)
-2. Перейдите в раздел API Keys
-3. Создайте новый ключ и сохраните его
+**Рекомендуем Groq** - полностью бесплатно и быстро! ⭐
+
+1. Зарегистрируйтесь на [console.groq.com](https://console.groq.com/)
+2. Перейдите в "API Keys" → "Create API Key"
+3. Сохраните ключ
+
+**Другие варианты:**
+- [Google Gemini](https://makersuite.google.com/app/apikey) - бесплатно
+- [Ollama](https://ollama.com/) - локально, не нужен API ключ
+- [Claude](https://console.anthropic.com/) - платно, премиум
+
+📖 Подробные инструкции для каждого провайдера: [AI_PROVIDERS.md](AI_PROVIDERS.md)
 
 ### Шаг 5: Получение вашего Telegram User ID
 
@@ -106,8 +122,9 @@ cp .env.example .env
 # Bot Token от @BotFather
 TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
 
-# Anthropic Claude API Key
-ANTHROPIC_API_KEY=sk-ant-api03-xxx
+# AI Provider (groq - бесплатно и быстро!)
+AI_PROVIDER=groq
+AI_API_KEY=gsk_ваш_ключ_от_groq
 
 # Ваш Telegram User ID
 ADMIN_USER_ID=123456789

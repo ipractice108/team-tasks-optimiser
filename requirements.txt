@@ -1,8 +1,20 @@
 python-telegram-bot==20.7
-anthropic==0.39.0
 sqlalchemy==2.0.23
 python-dotenv==1.0.0
 apscheduler==3.10.4
 asyncio==3.4.3
 aiosqlite==0.19.0
 pytz==2023.3
+
+# AI Providers (install only what you need)
+# Groq (recommended - free and fast)
+groq==0.11.0
+
+# Google Gemini (free tier available)
+google-generativeai==0.8.3
+
+# Ollama (local, completely free)
+ollama==0.3.3
+
+# Claude (paid, but high quality)
+anthropic==0.39.0

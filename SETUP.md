@@ -22,11 +22,20 @@ cd team-tasks-optimiser
 3. Следуйте инструкциям
 4. Сохраните **Bot Token** (выглядит как `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)
 
-### 4. Получите Claude API ключ
+### 4. Получите AI API ключ (БЕСПЛАТНО!)
 
-1. Зарегистрируйтесь на [console.anthropic.com](https://console.anthropic.com/)
-2. Создайте API ключ
-3. Сохраните его (выглядит как `sk-ant-api03-xxx...`)
+**Рекомендуем Groq - полностью бесплатно:** ⭐
+
+1. Зарегистрируйтесь на [console.groq.com](https://console.groq.com/)
+2. Перейдите в "API Keys" → "Create API Key"
+3. Сохраните ключ (выглядит как `gsk_xxx...`)
+
+**Альтернативы:**
+- **Google Gemini** (бесплатно): [makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+- **Ollama** (локально, бесплатно): Не нужен API ключ
+- **Claude** (платно): [console.anthropic.com](https://console.anthropic.com/)
+
+📖 Подробные инструкции: см. [AI_PROVIDERS.md](AI_PROVIDERS.md)
 
 ### 5. Узнайте свой Telegram ID
 
@@ -40,13 +49,18 @@ cp .env.example .env
 nano .env  # или любой другой редактор
 ```
 
-Заполните три обязательных поля:
+Заполните обязательные поля:
 
 ```env
 TELEGRAM_BOT_TOKEN=ваш_токен_от_BotFather
-ANTHROPIC_API_KEY=ваш_ключ_от_Anthropic
 ADMIN_USER_ID=ваш_telegram_id
+
+# AI Provider (groq - бесплатно и быстро!)
+AI_PROVIDER=groq
+AI_API_KEY=gsk_ваш_ключ_от_groq
 ```
+
+💡 Для других провайдеров см. [AI_PROVIDERS.md](AI_PROVIDERS.md)
 
 ### 7. Запустите бота
 

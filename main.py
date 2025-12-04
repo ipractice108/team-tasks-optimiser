@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from telegram.ext import Application
 
 from database import Database
-from analyzer import ClaudeAnalyzer
+from analyzer import AIAnalyzer
 from bot import setup_handlers, AnalysisScheduler
 
 # Load environment variables
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def validate_env():
     """Validate required environment variables"""
-    required_vars = ['TELEGRAM_BOT_TOKEN', 'ANTHROPIC_API_KEY', 'ADMIN_USER_ID']
+    required_vars = ['TELEGRAM_BOT_TOKEN', 'ADMIN_USER_ID']
     missing = []
 
     for var in required_vars:
@@ -41,6 +41,19 @@ def validate_env():
     if missing:
         logger.error(f"Missing required environment variables: {', '.join(missing)}")
         logger.error("Please check your .env file")
+        return False
+
+    # Check AI provider configuration
+    ai_provider = os.getenv('AI_PROVIDER', 'groq').lower()
+    if ai_provider not in ['groq', 'gemini', 'ollama', 'claude']:
+        logger.error(f"Invalid AI_PROVIDER: {ai_provider}")
+        logger.error("Must be one of: groq, gemini, ollama, claude")
+        return False
+
+    # Check API key for providers that need it
+    if ai_provider != 'ollama' and not os.getenv('AI_API_KEY'):
+        logger.error(f"AI_API_KEY is required for provider: {ai_provider}")
+        logger.error("Please set AI_API_KEY in .env file")
         return False
 
     return True
@@ -82,7 +95,9 @@ def main():
 
     # Initialize analyzer
     logger.info("Initializing AI analyzer...")
-    analyzer = ClaudeAnalyzer()
+    ai_provider = os.getenv('AI_PROVIDER', 'groq').lower()
+    logger.info(f"Using AI provider: {ai_provider}")
+    analyzer = AIAnalyzer()
     logger.info("AI analyzer initialized")
 
     # Create application

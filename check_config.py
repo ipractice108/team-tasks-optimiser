@@ -57,19 +57,55 @@ def check_telegram_token():
     print_status("Формат TELEGRAM_BOT_TOKEN", True, "Корректный")
     return True
 
-def check_anthropic_key():
-    """Validate Anthropic API key format"""
-    key = os.getenv('ANTHROPIC_API_KEY')
-    if not key:
+def check_ai_provider():
+    """Validate AI provider configuration"""
+    provider = os.getenv('AI_PROVIDER', 'groq').lower()
+
+    valid_providers = ['groq', 'gemini', 'ollama', 'claude']
+    if provider not in valid_providers:
+        print_status("AI_PROVIDER", False,
+                    f"Неверный провайдер '{provider}'. Доступны: {', '.join(valid_providers)}")
         return False
 
-    # Basic format check: should start with 'sk-ant-'
-    if not key.startswith('sk-ant-'):
-        print_status("Формат ANTHROPIC_API_KEY", False,
-                    "Неверный формат ключа (должен начинаться с 'sk-ant-')")
-        return False
+    print_status("AI_PROVIDER", True, f"= {provider}")
 
-    print_status("Формат ANTHROPIC_API_KEY", True, "Корректный")
+    # Check API key for providers that need it
+    if provider != 'ollama':
+        api_key = os.getenv('AI_API_KEY')
+        if not api_key:
+            print_status("AI_API_KEY", False,
+                        f"API ключ обязателен для провайдера '{provider}'")
+            return False
+
+        # Validate key format
+        key_preview = api_key[:15] + "..." if len(api_key) > 15 else "***"
+
+        if provider == 'claude' and not api_key.startswith('sk-ant-'):
+            print_status("AI_API_KEY", False,
+                        f"Ключ Claude должен начинаться с 'sk-ant-'")
+            return False
+        elif provider == 'groq' and not api_key.startswith('gsk_'):
+            print_status("AI_API_KEY", False,
+                        f"Ключ Groq должен начинаться с 'gsk_'")
+            return False
+
+        print_status("AI_API_KEY", True, f"= {key_preview}")
+    else:
+        print_status("AI_API_KEY", True, "Не требуется для Ollama")
+
+    # Check model
+    model = os.getenv('AI_MODEL', '')
+    if model:
+        print_status("AI_MODEL", True, f"= {model}")
+    else:
+        defaults = {
+            'groq': 'llama-3.1-70b-versatile',
+            'gemini': 'gemini-pro',
+            'ollama': 'llama3.1',
+            'claude': 'claude-3-5-sonnet-20241022'
+        }
+        print_status("AI_MODEL", True, f"По умолчанию: {defaults.get(provider, 'н/д')}")
+
     return True
 
 def check_user_id():
@@ -164,15 +200,18 @@ def main():
     # Check required variables
     print("📋 Проверка обязательных переменных:")
     token_ok = check_env_var('TELEGRAM_BOT_TOKEN')
-    api_key_ok = check_env_var('ANTHROPIC_API_KEY')
     user_id_ok = check_env_var('ADMIN_USER_ID')
     print()
 
     # Validate formats
     print("📋 Проверка форматов:")
     token_format_ok = check_telegram_token() if token_ok else False
-    api_format_ok = check_anthropic_key() if api_key_ok else False
     user_format_ok = check_user_id() if user_id_ok else False
+    print()
+
+    # Check AI provider
+    print("📋 Проверка AI провайдера:")
+    ai_provider_ok = check_ai_provider()
     print()
 
     # Check optional variables
@@ -187,8 +226,9 @@ def main():
     print("=" * 60)
     all_ok = all([
         python_ok,
-        token_ok, api_key_ok, user_id_ok,
-        token_format_ok, api_format_ok, user_format_ok,
+        token_ok, user_id_ok,
+        token_format_ok, user_format_ok,
+        ai_provider_ok,
         schedule_ok
     ])
 
