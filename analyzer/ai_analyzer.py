@@ -218,3 +218,57 @@ class AIAnalyzer:
 
         except Exception as e:
             return full_analysis  # Return full analysis if summary fails
+
+    def answer_question(self, question: str, last_analysis: str = None,
+                       recent_messages: List[Message] = None) -> str:
+        """
+        Answer user question based on chat analysis and messages
+
+        Args:
+            question: User's question
+            last_analysis: Last analysis report text
+            recent_messages: Recent messages from chat for context
+
+        Returns:
+            Answer to the question
+        """
+        # Build context
+        context_parts = []
+
+        if last_analysis:
+            context_parts.append("ПОСЛЕДНИЙ АНАЛИЗ ЧАТА:")
+            context_parts.append(last_analysis)
+            context_parts.append("\n" + "="*60 + "\n")
+
+        if recent_messages:
+            context_parts.append("ПОСЛЕДНИЕ СООБЩЕНИЯ ИЗ ЧАТА:")
+            messages_text = self._format_messages(recent_messages)
+            context_parts.append(messages_text)
+            context_parts.append("\n" + "="*60 + "\n")
+
+        context = "\n".join(context_parts)
+
+        # Create prompt
+        prompt = f"""Ты - AI-ассистент, который помогает анализировать рабочие процессы команды.
+
+У тебя есть доступ к анализу переписки команды и к самим сообщениям.
+
+{context}
+
+ВОПРОС ПОЛЬЗОВАТЕЛЯ:
+{question}
+
+Ответь на вопрос пользователя, основываясь на:
+1. Данных из анализа чата (если доступен)
+2. Конкретных сообщениях из чата (если доступны)
+3. Своих знаниях о лучших практиках в управлении командами и процессами
+
+Давай конкретный, практичный ответ. Если в данных есть конкретные примеры из чата - используй их.
+Если данных недостаточно для точного ответа - так и скажи, но дай общие рекомендации.
+
+Отвечай на русском языке."""
+
+        try:
+            return self._call_ai_api(prompt)
+        except Exception as e:
+            return f"Ошибка при получении ответа: {str(e)}"

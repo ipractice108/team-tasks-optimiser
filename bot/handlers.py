@@ -34,12 +34,15 @@ class BotHandlers:
             "📊 Собирать сообщения из всех топиков\n"
             "🤖 Анализировать процессы и коммуникацию\n"
             "💡 Предлагать оптимизации\n"
-            "📨 Отправлять отчёты вам в личку 2 раза в неделю\n\n"
+            "📨 Отправлять отчёты вам в личку 2 раза в неделю\n"
+            "❓ Отвечать на ваши вопросы на основе анализа\n\n"
             "Команды:\n"
             "/start - это сообщение\n"
             "/analyze - запустить анализ вручную\n"
             "/status - статус мониторинга\n"
-            "/help - помощь"
+            "/help - помощь\n\n"
+            "💬 Просто напишите мне вопрос в личку после анализа,\n"
+            "и я отвечу на основе данных из вашего чата!"
         )
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -52,6 +55,7 @@ class BotHandlers:
 1. Добавьте меня в рабочий чат как администратора
 2. Я автоматически начну собирать сообщения
 3. Два раза в неделю буду отправлять вам анализ
+4. Задавайте мне вопросы в личных сообщениях!
 
 **Команды:**
 
@@ -67,6 +71,16 @@ class BotHandlers:
 ✅ Выявление узких мест
 ✅ Рекомендации по оптимизации
 ✅ Автоматические отчёты 2 раза в неделю
+✅ Ответы на вопросы по результатам анализа
+
+**Как задавать вопросы:**
+
+После получения анализа просто напишите мне вопрос в личку:
+• "Какие основные проблемы в команде?"
+• "Что можно улучшить в коммуникации?"
+• "Какие задачи занимают больше всего времени?"
+
+Я отвечу на основе анализа ваших переписок!
 
 **Конфиденциальность:**
 
@@ -125,7 +139,7 @@ class BotHandlers:
             )
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle incoming messages"""
+        """Handle incoming messages in group chats"""
         message = update.message
         if not message or not message.text:
             return
@@ -167,6 +181,79 @@ class BotHandlers:
 
         except Exception as e:
             logger.error(f"Error saving message: {e}")
+
+    async def handle_question(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle questions in private chat based on analysis"""
+        message = update.message
+        if not message or not message.text:
+            return
+
+        user = update.effective_user
+        question = message.text
+
+        # Send "thinking" message
+        thinking_msg = await update.message.reply_text("🤔 Ищу информацию в анализе чата...")
+
+        try:
+            # Get last report for this user
+            # We need to find which chat they want to ask about
+            # For now, get the most recent report
+            session = self.db.get_session()
+            try:
+                from database.models import User, AnalysisReport
+                from sqlalchemy import desc
+
+                user_obj = session.query(User).filter_by(telegram_id=user.id).first()
+                if not user_obj:
+                    await thinking_msg.edit_text(
+                        "❌ Сначала запустите анализ в рабочем чате с помощью /analyze"
+                    )
+                    return
+
+                # Get last report
+                last_report = session.query(AnalysisReport).filter_by(
+                    user_id=user_obj.id
+                ).order_by(desc(AnalysisReport.created_at)).first()
+
+                if not last_report:
+                    await thinking_msg.edit_text(
+                        "❌ Нет доступных анализов. Сначала запустите /analyze в рабочем чате."
+                    )
+                    return
+
+                # Get recent messages from that chat
+                chat_id = last_report.chat_id
+                recent_messages = self.db.get_messages(chat_id, days_back=7)
+
+                # Answer the question
+                answer = self.analyzer.answer_question(
+                    question=question,
+                    last_analysis=last_report.report_text,
+                    recent_messages=recent_messages
+                )
+
+                # Delete thinking message
+                await thinking_msg.delete()
+
+                # Send answer (handle long messages)
+                if len(answer) <= 4096:
+                    await update.message.reply_text(answer)
+                else:
+                    # Split into chunks
+                    chunks = [answer[i:i+4000] for i in range(0, len(answer), 4000)]
+                    for chunk in chunks:
+                        await update.message.reply_text(chunk)
+
+                logger.info(f"Answered question from user {user.id}: {question[:50]}...")
+
+            finally:
+                session.close()
+
+        except Exception as e:
+            logger.error(f"Error answering question: {e}")
+            await thinking_msg.edit_text(
+                f"❌ Ошибка при обработке вопроса: {str(e)}"
+            )
 
     async def perform_analysis(self, user_id: int, chat_id: int,
                               context: ContextTypes.DEFAULT_TYPE):
@@ -269,12 +356,23 @@ def setup_handlers(application: Application, db: Database, analyzer: AIAnalyzer)
     application.add_handler(CommandHandler("status", handlers.status_command))
     application.add_handler(CommandHandler("analyze", handlers.analyze_command))
 
-    # Register message handler (for all text messages in groups)
+    # Register message handlers
+    # 1. Questions in private chat (highest priority)
     application.add_handler(
         MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
+            filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE,
+            handlers.handle_question
+        ),
+        group=0
+    )
+
+    # 2. Messages in groups (for saving to database)
+    application.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND & ~filters.ChatType.PRIVATE,
             handlers.handle_message
-        )
+        ),
+        group=1
     )
 
     # Set post init
